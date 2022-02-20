@@ -10,11 +10,8 @@
   "author": "Cherish Sachdeva",
   "license": "ISC",
   "dependencies": {
-    "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.3",
-    "mongoose": "^6.2.2",
-    "passport": "^0.5.2",
-    "passport-google-oauth20": "^2.0.0"
+    "mongoose": "^6.2.2"
   }
 }

@@ -5,10 +5,6 @@ import {useNavigate} from "react-router-dom";
 
 const Login = ({setLoginUser})=>{
 
-    const google = ()=>{
-        window.open("http://localhost:4500/auth/google","_self")
-    }
-
     const navigate=useNavigate();
 
     const [user,setUser]=useState({
@@ -49,11 +45,6 @@ const Login = ({setLoginUser})=>{
             <div className="button" onClick={login}>Login</div>
             <div>or</div>
             <div className="button" onClick={()=>navigate("/register")}>Register</div>
-            <div>or</div>
-            <div className="loginButton google" onClick={google}>
-                <img src="../img/google.png" alt="" className="icon" />
-                Google
-            </div>
         </div>
     );
 }
