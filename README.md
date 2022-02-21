@@ -43,6 +43,7 @@ Follow the steps below, after cloning the repository:
 - Navigate into the server folder and use npm to install the server-side dependencies
 
 ```bash
+cd server
 npm install
 ```
 
