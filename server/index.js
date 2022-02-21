@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const jwt=require("jsonwebtoken");
 const nodemailer=require("nodemailer");
 const {google}=require("googleapis");
+const bcrypt=require('bcrypt');
 
 const CLIENT_ID="595092339925-bcbmrcbpoon8070fnqbi8lu25a7r88qc.apps.googleusercontent.com";
 const CLIENT_SECRET="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";
@@ -32,6 +33,17 @@ const userSchema=new mongoose.Schema({
     email: String,
     password: String
 });
+
+userSchema.pre('save',async function(next){
+    try{
+        const salt=await bcrypt.genSalt(10);
+        const hashedPassword=await bcrypt.hash(this.password,salt)
+        this.password=hashedPassword;
+        next()
+    }catch(error){
+        next(error)
+    }
+})
 
 const User=new mongoose.model("User",userSchema);
 

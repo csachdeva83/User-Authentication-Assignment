@@ -41,8 +41,8 @@ const ResetPassword = ()=>{
     return(
         <div className="resetPassword">
             <h1>Reset Password</h1>
-            <input type="password" name="ONEpassword" value={user.ONEpassword} placeholder="Enter your Password" onChange={handleChange}></input>
-            <input type="password" name="TWOpassword" value={user.TWOpassword} placeholder="Confirm your Password" onChange={handleChange}></input>
+            <input type="password" name="ONEpassword" value={user.ONEpassword} placeholder="Enter new Password" onChange={handleChange}></input>
+            <input type="password" name="TWOpassword" value={user.TWOpassword} placeholder="Confirm new Password" onChange={handleChange}></input>
             <div className="button" onClick={resetPassword}>Submit</div>
         </div>
     );
