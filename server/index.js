@@ -2,6 +2,13 @@ const express=require("express");
 const cors= require("cors");
 const mongoose = require('mongoose');
 const jwt=require("jsonwebtoken");
+const nodemailer=require("nodemailer");
+const {google}=require("googleapis");
+
+const CLIENT_ID="595092339925-bcbmrcbpoon8070fnqbi8lu25a7r88qc.apps.googleusercontent.com";
+const CLIENT_SECRET="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";
+const REDIRECT_URI="https://developers.google.com/oauthplayground";
+const REFRESH_TOKEN="1//0490CjSHlDw8FCgYIARAAGAQSNwF-L9IrJXbjfCQoV3zLaPFKndvvzyxpO9nG8ha4fvvpJu8lru2eiIlbFCznHao1haTptkFRFbo";
 
 const app=express();
 app.use(express.json());
@@ -9,6 +16,9 @@ app.use(express.urlencoded({extended: false }));
 app.use(cors());
 
 const JWT_SECRET='some super secret ...';
+
+const oAuth2Client=new google.auth.OAuth2(CLIENT_ID,CLIENT_SECRET,REDIRECT_URI);
+oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
 
 mongoose.connect("mongodb://localhost:27017/userAuthentication",{
     useNewUrlParser: true,
@@ -24,6 +34,39 @@ const userSchema=new mongoose.Schema({
 });
 
 const User=new mongoose.model("User",userSchema);
+
+let emailFP="";
+let link="";
+
+async function sendMail(){
+    try{
+        const accessToken=await oAuth2Client.getAccessToken();
+        const transport=nodemailer.createTransport({
+            service: 'gmail',
+            auth:{
+                type: 'OAuth2',
+                user: 'cherishsachdeva16@gmail.com',
+                clientId: CLIENT_ID,
+                clientSecret: CLIENT_SECRET,
+                refreshToken: REFRESH_TOKEN,
+                accessToken: accessToken
+            }
+        })
+
+        const mailOptions={
+            from: 'ADMIN <cherishsachdeva16@gmail.com>',
+            to: emailFP,
+            subject: 'Reset Password One Time Clickable Link',
+            text: link
+        };
+
+        const result=await transport.sendMail(mailOptions);
+        return result;
+
+    }catch(error){
+        return error;
+    }
+}
 
 //Routes
 app.post('/login',(req,res)=>{
@@ -67,10 +110,11 @@ app.post('/register',(req,res)=>{
 
 app.post('/forgot-password',(req,res,next)=>{
     console.log(req.body);
-    const { email} = req.body
+    const { email} = req.body;
+    emailFP=email;
     User.findOne({email:email},(err,user)=>{
         if(user){
-            // User exist and now create aone time link valid for 15 minutes
+            // User exist and now create time link valid for 15 minutes
             if(email===user.email){
                 const secret=JWT_SECRET+user.password;
                 const payload={
@@ -78,7 +122,10 @@ app.post('/forgot-password',(req,res,next)=>{
                     id: user.id
                 }
                 const token=jwt.sign(payload,secret,{expiresIn: '15m'})
-                const link=`http://localhost:4500/reset-password/${user.id}/${token}`;
+                link=`http://localhost:4500/reset-password/${user.id}/${token}`;
+                sendMail()
+                .then((result)=>console.log('Email sent ..',result))
+                .catch((error)=>console.log(error.message));
                 console.log(link);
                 res.send({message: "Password reset link has been sent to ur email...",user:user})
             }else{

@@ -32,3 +32,16 @@
     outline: none;
     cursor: pointer;
 }
+
+.forget{
+    cursor: pointer;
+    text-align: left;
+    margin-left: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #1877f2;
+}
+
+.forget:hover{
+    color: black;
+}

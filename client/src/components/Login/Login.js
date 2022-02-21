@@ -42,6 +42,7 @@ const Login = ({setLoginUser})=>{
             <h1>Login</h1>
             <input type="text" name="email" value={user.email} onChange={handleChange} placeholder="Enter your Email"></input>
             <input type="password" name="password" value={user.password} onChange={handleChange} placeholder="Enter your password"></input>
+            <div className="forget" onClick={()=>navigate("/forgot-password")}>Forget Password</div>
             <div className="button" onClick={login}>Login</div>
             <div>or</div>
             <div className="button" onClick={()=>navigate("/register")}>Register</div>
