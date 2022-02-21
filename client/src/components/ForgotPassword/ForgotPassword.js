@@ -13,7 +13,6 @@ const ForgotPassword = ()=>{
 
     const handleChange= (e)=>{
         const {name,value}=e.target;
-        // console.log(name,value);
         setUser({
             [name]:value
         })
@@ -22,11 +21,9 @@ const ForgotPassword = ()=>{
     const forgotPassword=()=>{
         const {email}=user;
         if(email){
-            alert("posted");
             axios.post("http://localhost:4500/forgot-password",user) // to send user object info to backend to store in DB
             .then(res=>{
                 alert(res.data.message); // will be executed after post
-                // navigate("/login");
             });
         }else{
             alert("invalid input");

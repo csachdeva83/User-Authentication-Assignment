@@ -26,7 +26,6 @@ const Register = ()=>{
     const register=()=>{
         const {name,email,password,reEnterPassword}=user;
         if(name && email && password && password===reEnterPassword){
-            alert("posted");
             axios.post("http://localhost:4500/register",user) // to send user object info to backend to store in DB
             .then(res=>{
                 alert(res.data.message);

@@ -14,7 +14,6 @@ const Login = ({setLoginUser})=>{
 
     const handleChange= (e)=>{
         const {name,value}=e.target;
-        // console.log(name,value);
         setUser({
             ...user,
             [name]:value
@@ -24,7 +23,6 @@ const Login = ({setLoginUser})=>{
     const login= ()=>{
         const {email,password}=user;
         if(email && password){
-            alert("posted");
             axios.post("http://localhost:4500/login",user) // to send user object info to backend to store in DB
             .then(res=>{
                 alert(res.data.message); // will be executed after post

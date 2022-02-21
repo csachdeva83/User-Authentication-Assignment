@@ -1,55 +1,38 @@
+// Calling out required packages
+
 const express=require("express");
 const cors= require("cors");
-const mongoose = require('mongoose');
+const User =require("./Models/User.model");
+const bcrypt=require('bcrypt');
 const jwt=require("jsonwebtoken");
 const nodemailer=require("nodemailer");
 const {google}=require("googleapis");
-const bcrypt=require('bcrypt');
 
-const CLIENT_ID="595092339925-bcbmrcbpoon8070fnqbi8lu25a7r88qc.apps.googleusercontent.com";
-const CLIENT_SECRET="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";
-const REDIRECT_URI="https://developers.google.com/oauthplayground";
-const REFRESH_TOKEN="1//0490CjSHlDw8FCgYIARAAGAQSNwF-L9IrJXbjfCQoV3zLaPFKndvvzyxpO9nG8ha4fvvpJu8lru2eiIlbFCznHao1haTptkFRFbo";
+const path=require('path');
+require('dotenv').config({
+    path: path.join(__dirname,".env")
+})
 
 const app=express();
 app.use(express.json());
 app.use(express.urlencoded({extended: false }));
 app.use(cors());
 
-const JWT_SECRET='some super secret ...';
+const JWT_SECRET=`${process.env.JWT_SECRET}`;
+
+// GMAIL API credentials
+const CLIENT_ID=`${process.env.CLIENT_ID}`;
+const CLIENT_SECRET=`${process.env.CLIENT_SECRET}`;
+const REDIRECT_URI=`${process.env.REDIRECT_URI}`;
+const REFRESH_TOKEN=`${process.env.REFRESH_TOKEN}`;
 
 const oAuth2Client=new google.auth.OAuth2(CLIENT_ID,CLIENT_SECRET,REDIRECT_URI);
 oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
 
-mongoose.connect("mongodb://localhost:27017/userAuthentication",{
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-},()=>{
-    console.log("DB is connected")
-});
-
-const userSchema=new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String
-});
-
-userSchema.pre('save',async function(next){
-    try{
-        const salt=await bcrypt.genSalt(10);
-        const hashedPassword=await bcrypt.hash(this.password,salt)
-        this.password=hashedPassword;
-        next()
-    }catch(error){
-        next(error)
-    }
-})
-
-const User=new mongoose.model("User",userSchema);
-
 let emailFP="";
 let link="";
 
+// For sending reset password link to registered email
 async function sendMail(){
     try{
         const accessToken=await oAuth2Client.getAccessToken();
@@ -80,13 +63,16 @@ async function sendMail(){
     }
 }
 
-//Routes
+// Routes
+
+// Login user post request
 app.post('/login',(req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const { email, password} = req.body
     User.findOne({email:email},(err,user)=>{
         if(user){
-            if(password===user.password){
+            // comparing input password and hashed password
+            if(bcrypt.compareSync(password,user.password)){
                 res.send({message: "Login Successfull",user:user})
             }else{
                 res.send({message: "Wrong Password"})
@@ -97,8 +83,9 @@ app.post('/login',(req,res)=>{
     })
 })
 
+// Register user post request
 app.post('/register',(req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const {name,email,password}=req.body;
     User.findOne({email: email},(err,user)=>{
         if(user){
@@ -120,8 +107,9 @@ app.post('/register',(req,res)=>{
     })
 })
 
+// Post request to send mail with reset password link if user forgot password
 app.post('/forgot-password',(req,res,next)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const { email} = req.body;
     emailFP=email;
     User.findOne({email:email},(err,user)=>{
@@ -150,6 +138,7 @@ app.post('/forgot-password',(req,res,next)=>{
 
 })
 
+// Get request to verify id and jwt tokens before resetting password
 app.get('/reset-password/:id/:token',(req,res,next)=>{ 
     const {id,token}=req.params;
     // Check if this id exist in database
@@ -162,7 +151,7 @@ app.get('/reset-password/:id/:token',(req,res,next)=>{
                     const payload=jwt.verify(token,secret);
                     res.redirect(`http://localhost:3000/reset-password/${id}/${token}`);
                 }catch(error){
-                    console.log(error.message);
+                    // console.log(error.message);
                     res.send(error.message);
                 }
             }else{
@@ -174,6 +163,8 @@ app.get('/reset-password/:id/:token',(req,res,next)=>{
     })
 })
 
+
+// Post request to set input data as new passport and save it in database
 app.post('/reset-password/:id/:token',(req,res,next)=>{
     const {id,token}=req.params;
     const {ONEpassword,TWOpassword}=req.body;
@@ -188,7 +179,6 @@ app.post('/reset-password/:id/:token',(req,res,next)=>{
                     // validate password and password2 should match
                     if(ONEpassword === TWOpassword){
                         // we can simply find the user with the payload email and id and finally update the new password
-                        // always hash the password before saving
                         user.password=ONEpassword;
                         user.save(err=>{
                             if(err){
@@ -197,10 +187,10 @@ app.post('/reset-password/:id/:token',(req,res,next)=>{
                                 res.send({message: "Successfully Password Changed"})
                             }
                         })
-                        console.log(user);
+                        // console.log(user);
                     }
                 }catch(error){
-                    console.log(error.message);
+                    // console.log(error.message);
                     res.send(error.message);
                 }
             }else{

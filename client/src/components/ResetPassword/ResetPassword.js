@@ -27,7 +27,6 @@ const ResetPassword = ()=>{
         const {ONEpassword,TWOpassword}=user;
         console.log(ONEpassword,TWOpassword);
         if(ONEpassword && TWOpassword){
-            alert("posted");
             axios.post(`http://localhost:4500/reset-password/${id}/${token}`,user) // to send user object info to backend to store in DB
             .then(res=>{
                 alert(res.data.message); // will be executed after post
