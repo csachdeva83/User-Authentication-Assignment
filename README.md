@@ -1,5 +1,4 @@
-<h1 align="center">CODING ASSIGNMENT</h1>
-<h2 align="center">User Authentication</h2>
+<h1 align="center">User Authentication</h1>
 <h3 align="center">Tech-Stack: ReactJS, NodeJS, ExpressJS, MongoDB</h3>
 
 ## 🧐 FLOW OF PROJECT
